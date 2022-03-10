@@ -42,7 +42,7 @@ class markov():
 
     # Le code qui suit est fourni pour vous faciliter la vie.  Il n'a pas à être modifié
     # Signes de ponctuation à retirer (compléter la liste qui ne comprend que "!" et "," au départ)
-    PONC = ["!",","]
+    PONC = [',', '.', '«', '»', "'", '!', '?', '  ', '\n', '-', ';', ':', '(', ')', '[', ']']
 
     def set_ponc(self, value):
         """Détermine si les signes de ponctuation sont conservés (True) ou éliminés (False)
