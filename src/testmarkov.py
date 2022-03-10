@@ -11,8 +11,6 @@ import argparse
 import importlib
 import sys
 
-import markov_CIP1_CIP2 as markov
-
 
 class TestMarkov():
     """Classe à utiliser pour valider la résolution de la problématique :

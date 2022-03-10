@@ -1,5 +1,12 @@
-from extract import extractData
+# from extract import extractData
+#
+# authorDict = extractData()
+#
+# print('hi')
 
-authorDict = extractData()
+from markov_CIP1_CIP2 import *
 
-print('hi')
+test1 = markov()
+test1.set_auteurs()
+test1.set_ponc(False)
+test1.analyze()

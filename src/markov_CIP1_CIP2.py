@@ -26,6 +26,7 @@ import os
 import glob
 import ntpath
 
+
 class markov():
     """Classe à utiliser pour coder la solution à la problématique:
 
@@ -83,7 +84,7 @@ class markov():
         Returns:
             oeuvres (Liste[string]): liste des oeuvres (avec le chemin complet pour y accéder)
         """
-        auteur_dir = self.rep_aut + "/" + auteur + "/*"
+        auteur_dir = self.rep_aut +"/" + auteur + "/*"
         oeuvres = glob.glob(auteur_dir)
         return oeuvres
 
@@ -107,7 +108,6 @@ class markov():
         self.set_auteurs()
         return
 
-
     def set_ngram(self, ngram):
         """Indique que l'analyse et la génération de texte se fera avec des n-grammes de taille ngram
 
@@ -130,6 +130,7 @@ class markov():
         """
 
         # Initialisation des champs nécessaires aux fonctions fournies
+        self.DATA = {}
         self.keep_ponc = True
         self.rep_aut = os.getcwd()
         self.auteurs = []
@@ -158,8 +159,7 @@ class markov():
             resultats (Liste[(string,float)]) : Liste de tuples (auteurs, niveau de proximité), où la proximité est un nombre entre 0 et 1)
         """
 
-        resultats = [("balzac", 0.1234), ("voltaire", 0.1123)]   # Exemple du format des sorties
-
+        resultats = [("balzac", 0.1234), ("voltaire", 0.1123)]  # Exemple du format des sorties
 
         # Ajouter votre code pour déterminer la proximité du fichier passé en paramètre avec chacun des auteurs
         # Retourner la liste des auteurs, chacun avec sa proximité au fichier inconnu
@@ -196,9 +196,8 @@ class markov():
         Returns:
             ngram (List[Liste[string]]) : Liste de liste de mots composant le n-gramme recherché (il est possible qu'il y ait plus d'un n-gramme au même rang)
         """
-        ngram = [['un', 'roman']]   # Exemple du format de sortie d'un bigramme
+        ngram = [['un', 'roman']]  # Exemple du format de sortie d'un bigramme
         return ngram
-
 
     def analyze(self):
         """Fait l'analyse des textes fournis, en traitant chaque oeuvre de chaque auteur
@@ -222,5 +221,48 @@ class markov():
         #       avant des les additionner pour obtenir le vecteur global d'un auteur
         #   De cette façon, les mots d'un court poème auraient une importance beaucoup plus grande que
         #   les mots d'une très longue oeuvre du même auteur. Ce n'est PAS ce qui vous est demandé ici.
+        for authors in self.auteurs:
+            for oeuvrePath in self.get_aut_files(authors):
+                currentText = open(oeuvrePath, 'r', encoding='utf-8').read()
+                oeuvreData = {}
+                currentText = currentText.lower()
+
+                # retirer la ponctuation
+                if not self.keep_ponc:
+                    for separator in self.PONC:
+                        currentText = currentText.replace(separator, ' ')
+
+                # separation du string en list
+                wordList = currentText.split()
+
+                # transformation de le list en dictionary
+
+                for word in wordList:
+                    if word not in oeuvreData:
+                        oeuvreData[word] = 1
+                    else:
+                        oeuvreData[word] += 1
+
+                # retirer les mots de 2 caracteres ou moins
+                for word in list(oeuvreData):
+                    if len(word) <= 2:
+                        oeuvreData.pop(word)
+
+                self.DATA[authors] = oeuvreData
+
+        # normalisation
+
+        for authors in self.DATA:
+            totalWords = 0
+            self.DATA[authors]["normal"] = {}
+            for oeuvre in self.DATA[authors]:
+                for word in self.DATA[authors][oeuvre]:
+                    total = self.DATA[authors][oeuvre][word]
+                    if word in self.DATA[authors]["normal"]:
+                        self.DATA[authors]["normal"][word] += 1
+                    else:
+                        self.DATA[authors]["normal"][word] = 1
+            for word in self.DATA[authors]["normal"]:
+                self.DATA[authors]["normal"][word] /= totalWords
 
         return
