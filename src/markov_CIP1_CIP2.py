@@ -223,7 +223,7 @@ class markov():
         #   les mots d'une très longue oeuvre du même auteur. Ce n'est PAS ce qui vous est demandé ici.
         for authors in self.auteurs:
             for oeuvrePath in self.get_aut_files(authors):
-                currentText = open(oeuvrePath, 'r', encoding='utf-8').read()
+                currentText = open(oeuvrePath, 'r', encoding='latin1').read()
                 oeuvreData = {}
                 currentText = currentText.lower()
 
