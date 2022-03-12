@@ -138,6 +138,9 @@ class markov():
 
         # Au besoin, ajouter votre code d'initialisation de l'objet de type markov lors de sa création
 
+        self.wordCountAuthor = {}
+        self.identity = {}
+        self.orderedIdentity = {}
         return
 
     # Ajouter les structures de données et les fonctions nécessaires à l'analyse des textes,
@@ -201,7 +204,6 @@ class markov():
 
     def analyze(self):
         """Fait l'analyse des textes fournis, en traitant chaque oeuvre de chaque auteur
-
         Args:
             void: toute l'information est contenue dans l'objet markov
 
@@ -222,6 +224,7 @@ class markov():
         #   De cette façon, les mots d'un court poème auraient une importance beaucoup plus grande que
         #   les mots d'une très longue oeuvre du même auteur. Ce n'est PAS ce qui vous est demandé ici.
         for authors in self.auteurs:
+            self.wordCountAuthor[authors]=0
             for oeuvrePath in self.get_aut_files(authors):
                 currentText = open(oeuvrePath, 'r', encoding='latin-1').read()
                 oeuvreData = {}
@@ -240,9 +243,10 @@ class markov():
                 for word in wordList:
                     if word not in oeuvreData:
                         oeuvreData[word] = 1
+
                     else:
                         oeuvreData[word] += 1
-
+                    self.wordCountAuthor[authors] +=1
                 # retirer les mots de 2 caracteres ou moins
                 for word in list(oeuvreData):
                     if len(word) <= 2:
@@ -250,60 +254,16 @@ class markov():
 
                 self.DATA[authors] = oeuvreData
 
+
         # normalisation
 
         for authors in self.DATA:
-            totalWords = 0
-            self.DATA[authors]["normal"] = {}
-            for oeuvre in self.DATA[authors]:
-                for word in self.DATA[authors][oeuvre]:
-                    total = self.DATA[authors][oeuvre][word]
-                    if word in self.DATA[authors]["normal"]:
-                        self.DATA[authors]["normal"][word] += 1
-                    else:
-                        self.DATA[authors]["normal"][word] = 1
-            for word in self.DATA[authors]["normal"]:
-                self.DATA[authors]["normal"][word] /= totalWords
+            self.identity[authors]={}
+            #totalWords = len(self.DATA[authors])
+
+            for word in self.DATA[authors]:
+                self.identity[authors][word]=self.DATA[authors][word]/self.wordCountAuthor[authors]
+
+            self.orderedIdentity[authors]=dict(sorted(self.identity[authors].items(), key=lambda item: item[1], reverse=True))
         return
-
-    def mergeSort(self, arr):
-        if len(arr) > 1:
-
-            # Finding the mid of the array
-            mid = len(arr) // 2
-
-            # Dividing the array elements
-            L = arr[:mid]
-
-            # into 2 halves
-            R = arr[mid:]
-
-            # Sorting the first half
-            mergeSort(L)
-
-            # Sorting the second half
-            mergeSort(R)
-
-            i = j = k = 0
-
-            # Copy data to temp arrays L[] and R[]
-            while i < len(L) and j < len(R):
-                if L[i] < R[j]:
-                    arr[k] = L[i]
-                    i += 1
-                else:
-                    arr[k] = R[j]
-                    j += 1
-                k += 1
-
-            # Checking if any element was left
-            while i < len(L):
-                arr[k] = L[i]
-                i += 1
-                k += 1
-
-            while j < len(R):
-                arr[k] = R[j]
-                j += 1
-                k += 1
 
