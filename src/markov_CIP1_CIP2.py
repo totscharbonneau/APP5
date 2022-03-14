@@ -238,28 +238,40 @@ class markov():
                 # separation du string en list
                 wordList = currentText.split()
 
+                # separation en bigrammes si besoin
+                if self.ngram==2:
+                    tempString = ""
+                    for x in range(1,len(wordList)):
+                        tempString = wordList[x-1]+ " " + wordList[x]
+                        if tempString not in oeuvreData:
+                            oeuvreData[tempString] = 1
+
+                        else:
+                            oeuvreData[tempString] += 1
+                        self.wordCountAuthor[authors] += 1
+
+
                 # transformation de le list en dictionary
+                if self.ngram == 1:
+                    for word in wordList:
+                        if word not in oeuvreData:
+                            oeuvreData[word] = 1
 
-                for word in wordList:
-                    if word not in oeuvreData:
-                        oeuvreData[word] = 1
-
-                    else:
-                        oeuvreData[word] += 1
-                    self.wordCountAuthor[authors] +=1
-                # retirer les mots de 2 caracteres ou moins
-                for word in list(oeuvreData):
-                    if len(word) <= 2:
-                        oeuvreData.pop(word)
-
+                        else:
+                            oeuvreData[word] += 1
+                        self.wordCountAuthor[authors] +=1
+                    # retirer les mots de 2 caracteres ou moins
+                    for word in list(oeuvreData):
+                        if len(word) <= 2:
+                            oeuvreData.pop(word)
                 self.DATA[authors] = oeuvreData
+
 
 
         # normalisation
 
         for authors in self.DATA:
             self.identity[authors]={}
-            #totalWords = len(self.DATA[authors])
 
             for word in self.DATA[authors]:
                 self.identity[authors][word]=self.DATA[authors][word]/self.wordCountAuthor[authors]
