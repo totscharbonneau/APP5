@@ -141,6 +141,7 @@ class markov():
         self.wordCountAuthor = {}
         self.identity = {}
         self.orderedIdentity = {}
+        self.numberKey = {}
         return
 
     # Ajouter les structures de données et les fonctions nécessaires à l'analyse des textes,
@@ -199,7 +200,24 @@ class markov():
         Returns:
             ngram (List[Liste[string]]) : Liste de liste de mots composant le n-gramme recherché (il est possible qu'il y ait plus d'un n-gramme au même rang)
         """
-        ngram = [['un', 'roman']]  # Exemple du format de sortie d'un bigramme
+        lastValue = 0.0
+        counter = 0
+        ngram = []  # Exemple du format de sortie d'un bigramme
+
+
+        for gram in self.orderedIdentity[auteur]:
+            val = self.orderedIdentity[auteur][gram]
+            tempList = gram.split()
+            if val not in self.numberKey:
+                self.numberKey[val] = [tempList]
+            else:
+                self.numberKey[val].append(tempList)
+
+        for xgram in self.numberKey:
+            counter+=1
+            if counter == n:
+                ngram = self.numberKey[xgram]
+                break
         return ngram
 
     def analyze(self):
@@ -226,7 +244,7 @@ class markov():
         for authors in self.auteurs:
             self.wordCountAuthor[authors]=0
             for oeuvrePath in self.get_aut_files(authors):
-                currentText = open(oeuvrePath, 'r', encoding='latin-1').read()
+                currentText = open(oeuvrePath, 'r', encoding='utf-8').read()
                 oeuvreData = {}
                 currentText = currentText.lower()
 
