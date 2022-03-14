@@ -13,6 +13,6 @@ test1.ngram = 1
 test1.set_ponc(False)
 test1.analyze()
 
-test1.find_author("testText.txt")
+test1.gen_text("Balzac",100,"texttry.txt")
 
 print("test")

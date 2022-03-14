@@ -227,7 +227,8 @@ class markov():
             for word in oeuvreData:
                 if word in self.orderedIdentity[author]:
                     total += oeuvreData[word] * self.orderedIdentity[author][word]
-            total = total/(math.sqrt(sum(i**2 for i in oeuvreData.values()))*math.sqrt(sum(b**2 for b in self.orderedIdentity[author].values())))
+            total = total / (math.sqrt(sum(i ** 2 for i in oeuvreData.values())) * math.sqrt(
+                sum(b ** 2 for b in self.orderedIdentity[author].values())))
             resultats.append((author, total))
 
         return resultats
@@ -243,7 +244,13 @@ class markov():
         Returns:
             void : ne retourne rien, le texte produit doit être écrit dans le fichier "textname"
         """
-
+        newFile = open(textname, "w", encoding='utf-8')
+        for nbOfWords in range(int(taille/self.ngram)):
+            word = numpy.random.choice(list(self.orderedIdentity[auteur].keys()),
+                                       p=list(self.orderedIdentity[auteur].values()))
+            newFile.write(word)
+            newFile.write(" ")
+        newFile.close()
         return
 
     def get_nth_element(self, auteur, n):
@@ -260,7 +267,6 @@ class markov():
         counter = 0
         ngram = []  # Exemple du format de sortie d'un bigramme
 
-
         for gram in self.orderedIdentity[auteur]:
             val = self.orderedIdentity[auteur][gram]
             tempList = gram.split()
@@ -270,7 +276,7 @@ class markov():
                 self.numberKey[val].append(tempList)
 
         for xgram in self.numberKey:
-            counter+=1
+            counter += 1
             if counter == n:
                 ngram = self.numberKey[xgram]
                 break
@@ -343,9 +349,10 @@ class markov():
 
         for authors in self.DATA:
             self.identity[authors] = {}
+            totalword = sum(self.DATA[authors].values())
 
             for word in self.DATA[authors]:
-                self.identity[authors][word] = self.DATA[authors][word] / self.wordCountAuthor[authors]
+                self.identity[authors][word] = self.DATA[authors][word] / totalword
 
             self.orderedIdentity[authors] = dict(
                 sorted(self.identity[authors].items(), key=lambda item: item[1], reverse=True))
