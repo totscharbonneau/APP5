@@ -25,6 +25,8 @@
 import os
 import glob
 import ntpath
+import numpy
+import math
 
 
 class markov():
@@ -84,7 +86,7 @@ class markov():
         Returns:
             oeuvres (Liste[string]): liste des oeuvres (avec le chemin complet pour y accéder)
         """
-        auteur_dir = self.rep_aut +"/" + auteur + "/*"
+        auteur_dir = self.rep_aut + "/" + auteur + "/*"
         oeuvres = glob.glob(auteur_dir)
         return oeuvres
 
@@ -162,7 +164,7 @@ class markov():
             resultats (Liste[(string,float)]) : Liste de tuples (auteurs, niveau de proximité), où la proximité est un nombre entre 0 et 1)
         """
 
-        resultats = [("balzac", 0.1234), ("voltaire", 0.1123)]  # Exemple du format des sorties
+        resultats = []  # Exemple du format des sorties
 
         # Ajouter votre code pour déterminer la proximité du fichier passé en paramètre avec chacun des auteurs
         # Retourner la liste des auteurs, chacun avec sa proximité au fichier inconnu
@@ -172,6 +174,60 @@ class markov():
         #   Le produit scalaire devrait être normalisé avec la taille du vecteur associé au texte inconnu:
         #   proximité = (A . B) / (|A| |B|)   où A est le vecteur du texte inconnu et B est celui d'un auteur,
         #           . est le produit scalaire, et |X| est la norme (longueur) du vecteur X
+
+        oeuvrePath = os.path.join(os.getcwd() + "/" + oeuvre)
+
+        currentText = open(oeuvrePath, 'r', encoding='utf-8').read()
+
+        oeuvreData = {}
+        currentText = currentText.lower()
+        oeuvreGramCount = 0
+
+        # retirer la ponctuation
+        if not self.keep_ponc:
+            for separator in self.PONC:
+                currentText = currentText.replace(separator, ' ')
+
+        # separation du string en list
+        wordList = currentText.split()
+
+        # separation en bigrammes si besoin
+        if self.ngram == 2:
+            tempString = ""
+            for x in range(1, len(wordList)):
+                tempString = wordList[x - 1] + " " + wordList[x]
+                if tempString not in oeuvreData:
+                    oeuvreData[tempString] = 1
+
+                else:
+                    oeuvreData[tempString] += 1
+                oeuvreGramCount += 1
+
+        if self.ngram == 1:
+            for word in wordList:
+                if word not in oeuvreData:
+                    oeuvreData[word] = 1
+                else:
+                    oeuvreData[word] += 1
+                oeuvreGramCount += 1
+            # retirer les mots de 2 caracteres ou moins
+            for word in list(oeuvreData):
+                if len(word) <= 2:
+                    oeuvreData.pop(word)
+
+        # normalisation
+        for word in oeuvreData:
+            oeuvreData[word] = oeuvreData[word] / oeuvreGramCount
+        oeuvreData = dict(sorted(oeuvreData.items(), key=lambda item: item[1], reverse=True))
+
+        # comparaison des auteurs
+        for author in self.auteurs:
+            total = 0
+            for word in oeuvreData:
+                if word in self.orderedIdentity[author]:
+                    total += oeuvreData[word] * self.orderedIdentity[author][word]
+            total = total/(math.sqrt(sum(i**2 for i in oeuvreData.values()))*math.sqrt(sum(b**2 for b in self.orderedIdentity[author].values())))
+            resultats.append((author, total))
 
         return resultats
 
@@ -224,9 +280,9 @@ class markov():
         #   De cette façon, les mots d'un court poème auraient une importance beaucoup plus grande que
         #   les mots d'une très longue oeuvre du même auteur. Ce n'est PAS ce qui vous est demandé ici.
         for authors in self.auteurs:
-            self.wordCountAuthor[authors]=0
+            self.wordCountAuthor[authors] = 0
             for oeuvrePath in self.get_aut_files(authors):
-                currentText = open(oeuvrePath, 'r', encoding='latin-1').read()
+                currentText = open(oeuvrePath, 'r', encoding='utf-8').read()
                 oeuvreData = {}
                 currentText = currentText.lower()
 
@@ -239,17 +295,16 @@ class markov():
                 wordList = currentText.split()
 
                 # separation en bigrammes si besoin
-                if self.ngram==2:
+                if self.ngram == 2:
                     tempString = ""
-                    for x in range(1,len(wordList)):
-                        tempString = wordList[x-1]+ " " + wordList[x]
+                    for x in range(1, len(wordList)):
+                        tempString = wordList[x - 1] + " " + wordList[x]
                         if tempString not in oeuvreData:
                             oeuvreData[tempString] = 1
 
                         else:
                             oeuvreData[tempString] += 1
                         self.wordCountAuthor[authors] += 1
-
 
                 # transformation de le list en dictionary
                 if self.ngram == 1:
@@ -259,23 +314,21 @@ class markov():
 
                         else:
                             oeuvreData[word] += 1
-                        self.wordCountAuthor[authors] +=1
+                        self.wordCountAuthor[authors] += 1
                     # retirer les mots de 2 caracteres ou moins
                     for word in list(oeuvreData):
                         if len(word) <= 2:
                             oeuvreData.pop(word)
                 self.DATA[authors] = oeuvreData
 
-
-
         # normalisation
 
         for authors in self.DATA:
-            self.identity[authors]={}
+            self.identity[authors] = {}
 
             for word in self.DATA[authors]:
-                self.identity[authors][word]=self.DATA[authors][word]/self.wordCountAuthor[authors]
+                self.identity[authors][word] = self.DATA[authors][word] / self.wordCountAuthor[authors]
 
-            self.orderedIdentity[authors]=dict(sorted(self.identity[authors].items(), key=lambda item: item[1], reverse=True))
+            self.orderedIdentity[authors] = dict(
+                sorted(self.identity[authors].items(), key=lambda item: item[1], reverse=True))
         return
-
