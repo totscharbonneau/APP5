@@ -12,6 +12,7 @@ test1.set_aut_dir('resources')
 test1.ngram = 1
 test1.set_ponc(False)
 test1.analyze()
+test1.get_nth_element('Voltaire',4)
 
 test1.gen_text("Balzac",100,"texttry.txt")
 

@@ -263,10 +263,10 @@ class markov():
         Returns:
             ngram (List[Liste[string]]) : Liste de liste de mots composant le n-gramme recherché (il est possible qu'il y ait plus d'un n-gramme au même rang)
         """
-        lastValue = 0.0
-        counter = 0
-        ngram = []  # Exemple du format de sortie d'un bigramme
-
+        counter = 0 #counter pour savoir quand on a atteint le n-ième gramme
+        ngram = []
+        # loop pour regrouper les grammes par nombre d'apparition
+        # et non pas par nom
         for gram in self.orderedIdentity[auteur]:
             val = self.orderedIdentity[auteur][gram]
             tempList = gram.split()
@@ -275,6 +275,7 @@ class markov():
             else:
                 self.numberKey[val].append(tempList)
 
+        # trouve le n-ième gramme
         for xgram in self.numberKey:
             counter += 1
             if counter == n:
@@ -318,7 +319,7 @@ class markov():
                 # separation du string en list
                 wordList = currentText.split()
 
-                # separation en bigrammes si besoin
+                # analyse en bigrammes
                 if self.ngram == 2:
                     tempString = ""
                     for x in range(1, len(wordList)):
@@ -354,6 +355,8 @@ class markov():
             for word in self.DATA[authors]:
                 self.identity[authors][word] = self.DATA[authors][word] / totalword
 
+            #creation d'un dictionaire ordonné pour simplifier les operations futures
             self.orderedIdentity[authors] = dict(
                 sorted(self.identity[authors].items(), key=lambda item: item[1], reverse=True))
+
         return
